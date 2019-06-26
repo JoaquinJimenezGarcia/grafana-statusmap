@@ -1,7 +1,6 @@
 module.exports = (grunt) => {
   require('load-grunt-tasks')(grunt);
 
-  grunt.loadNpmTasks('grunt-execute');
   grunt.loadNpmTasks('grunt-contrib-clean');
   grunt.loadNpmTasks('grunt-notify');
 
@@ -46,8 +45,8 @@ module.exports = (grunt) => {
     babel: {
       options: {
         sourceMap: true,
-        presets: ['es2015'],
-        plugins: ['transform-es2015-modules-systemjs', 'transform-es2015-for-of', 'transform-class-properties', 'transform-object-rest-spread'],
+        presets: ['@babel/preset-env'],
+        plugins: ['@babel/plugin-transform-modules-systemjs', '@babel/plugin-transform-for-of', '@babel/plugin-proposal-class-properties', '@babel/plugin-proposal-object-rest-spread'],
       },
       dist: {
         files: [{
