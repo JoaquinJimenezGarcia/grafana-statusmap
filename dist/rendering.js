@@ -1,55 +1,36 @@
-'use strict';
+"use strict";
 
-System.register(['lodash', 'jquery', 'moment', 'app/core/utils/kbn', 'app/core/core', 'app/core/utils/ticks', 'd3', './libs/d3-scale-chromatic/index', './tooltip', './annotations'], function (_export, _context) {
+System.register(["lodash", "jquery", "moment", "app/core/utils/kbn", "app/core/core", "app/core/utils/ticks", "d3", "./libs/d3-scale-chromatic/index", "./tooltip", "./annotations"], function (_export, _context) {
   "use strict";
 
   var _, $, moment, kbn, appEvents, contextSrv, tickStep, getScaledDecimals, getFlotTickSize, d3, d3ScaleChromatic, StatusHeatmapTooltip, AnnotationTooltip, MIN_CARD_SIZE, CARD_H_SPACING, CARD_V_SPACING, CARD_ROUND, DATA_RANGE_WIDING_FACTOR, DEFAULT_X_TICK_SIZE_PX, DEFAULT_Y_TICK_SIZE_PX, X_AXIS_TICK_PADDING, Y_AXIS_TICK_PADDING, MIN_SELECTION_WIDTH;
 
   function link(scope, elem, attrs, ctrl) {
-    var data = void 0,
-        cardsData = void 0,
-        timeRange = void 0,
-        panel = void 0,
-        heatmap = void 0;
+    var data, cardsData, timeRange, panel, heatmap; // $heatmap is JQuery object, but heatmap is D3
 
-    // $heatmap is JQuery object, but heatmap is D3
     var $heatmap = elem.find('.status-heatmap-panel');
     var tooltip = new StatusHeatmapTooltip($heatmap, scope);
     var annotationTooltip = new AnnotationTooltip($heatmap, scope);
-
-    var width = void 0,
-        height = void 0,
-        yScale = void 0,
-        xScale = void 0,
-        chartWidth = void 0,
-        chartHeight = void 0,
-        chartTop = void 0,
-        chartBottom = void 0,
-        yAxisWidth = void 0,
-        xAxisHeight = void 0,
-        cardVSpacing = void 0,
-        cardHSpacing = void 0,
-        cardRound = void 0,
-        cardWidth = void 0,
-        cardHeight = void 0,
-        colorScale = void 0,
-        opacityScale = void 0,
-        mouseUpHandler = void 0,
-        xGridSize = void 0,
-        yGridSize = void 0;
-
+    var width, height, yScale, xScale, chartWidth, chartHeight, chartTop, chartBottom, yAxisWidth, xAxisHeight, cardVSpacing, cardHSpacing, cardRound, cardWidth, cardHeight, colorScale, opacityScale, mouseUpHandler, xGridSize, yGridSize;
     var yOffset = 0;
-
     var selection = {
       active: false,
       x1: -1,
       x2: -1
     };
-
-    var padding = { left: 0, right: 0, top: 0, bottom: 0 },
-        margin = { left: 25, right: 15, top: 10, bottom: 20 },
+    var padding = {
+      left: 0,
+      right: 0,
+      top: 0,
+      bottom: 0
+    },
+        margin = {
+      left: 25,
+      right: 15,
+      top: 10,
+      bottom: 20
+    },
         dataRangeWidingFactor = DATA_RANGE_WIDING_FACTOR;
-
     ctrl.events.on('render', function () {
       render();
     });
@@ -57,6 +38,7 @@ System.register(['lodash', 'jquery', 'moment', 'app/core/utils/kbn', 'app/core/c
     function setElementHeight() {
       try {
         var height = ctrl.height || panel.height || ctrl.row.height;
+
         if (_.isString(height)) {
           height = parseInt(height.replace('px', ''), 10);
         }
@@ -64,7 +46,6 @@ System.register(['lodash', 'jquery', 'moment', 'app/core/utils/kbn', 'app/core/c
         height -= panel.legend.show ? 32 : 10; // bottom padding and space for legend. Change margin in .status-heatmap-color-legend !
 
         $heatmap.css('height', height + 'px');
-
         return true;
       } catch (e) {
         // IE throws errors sometimes
@@ -74,6 +55,7 @@ System.register(['lodash', 'jquery', 'moment', 'app/core/utils/kbn', 'app/core/c
 
     function getYAxisWidth(elem) {
       var axis_text = elem.selectAll(".axis-y text").nodes();
+
       var max_text_width = _.max(_.map(axis_text, function (text) {
         // Use SVG getBBox method
         return text.getBBox().width;
@@ -84,6 +66,7 @@ System.register(['lodash', 'jquery', 'moment', 'app/core/utils/kbn', 'app/core/c
 
     function getXAxisHeight(elem) {
       var axis_line = elem.select(".axis-x line");
+
       if (!axis_line.empty()) {
         var axis_line_position = parseFloat(elem.select(".axis-x line").attr("y2"));
         var canvas_width = parseFloat(elem.attr("height"));
@@ -97,11 +80,11 @@ System.register(['lodash', 'jquery', 'moment', 'app/core/utils/kbn', 'app/core/c
     function addXAxis() {
       // Scale timestamps to cards centers
       scope.xScale = xScale = d3.scaleTime().domain([timeRange.from, timeRange.to]).range([xGridSize / 2, chartWidth - xGridSize / 2]);
-
       var ticks = chartWidth / DEFAULT_X_TICK_SIZE_PX;
       var grafanaTimeFormatter = grafanaTimeFormat(ticks, timeRange.from, timeRange.to);
-      var timeFormat = void 0;
+      var timeFormat;
       var dashboardTimeZone = ctrl.dashboard.getTimezone();
+
       if (dashboardTimeZone === 'utc') {
         timeFormat = d3.utcFormat(grafanaTimeFormatter);
       } else {
@@ -109,82 +92,84 @@ System.register(['lodash', 'jquery', 'moment', 'app/core/utils/kbn', 'app/core/c
       }
 
       var xAxis = d3.axisBottom(xScale).ticks(ticks).tickFormat(timeFormat).tickPadding(X_AXIS_TICK_PADDING).tickSize(chartHeight);
-
       var posY = chartTop;
       var posX = yAxisWidth;
+      heatmap.append("g").attr("class", "axis axis-x").attr("transform", "translate(" + posX + "," + posY + ")").call(xAxis); // Remove horizontal line in the top of axis labels (called domain in d3)
 
-      heatmap.append("g").attr("class", "axis axis-x").attr("transform", "translate(" + posX + "," + posY + ")").call(xAxis);
-
-      // Remove horizontal line in the top of axis labels (called domain in d3)
       heatmap.select(".axis-x").select(".domain").remove();
-    }
+    } // divide chart height by ticks for cards drawing
 
-    // divide chart height by ticks for cards drawing
+
     function getYScale(ticks) {
       var range = [];
-      var step = chartHeight / ticks.length;
-      // svg has y=0 on the top, so top card should have a minimal value in range
+      var step = chartHeight / ticks.length; // svg has y=0 on the top, so top card should have a minimal value in range
+
       range.push(step);
+
       for (var i = 1; i < ticks.length; i++) {
         range.push(step * (i + 1));
       }
-      return d3.scaleOrdinal().domain(ticks).range(range);
-    }
 
-    // divide chart height by ticks with offset for ticks drawing
+      return d3.scaleOrdinal().domain(ticks).range(range);
+    } // divide chart height by ticks with offset for ticks drawing
+
+
     function getYAxisScale(ticks) {
       var range = [];
-      var step = chartHeight / ticks.length;
-      // svg has y=0 on the top, so top tick should have a minimal value in range
+      var step = chartHeight / ticks.length; // svg has y=0 on the top, so top tick should have a minimal value in range
+
       range.push(yOffset);
+
       for (var i = 1; i < ticks.length; i++) {
         range.push(step * i + yOffset);
       }
+
       return d3.scaleOrdinal().domain(ticks).range(range);
     }
 
     function addYAxis() {
       var ticks = _.uniq(_.map(data, function (d) {
         return d.target;
-      }));
+      })); // Set default Y min and max if no data
 
-      // Set default Y min and max if no data
+
       if (_.isEmpty(data)) {
         ticks = [''];
       }
 
       if (panel.yAxisSort == 'a → z') {
         ticks.sort(function (a, b) {
-          return a.localeCompare(b, 'en', { ignorePunctuation: false, numeric: true });
+          return a.localeCompare(b, 'en', {
+            ignorePunctuation: false,
+            numeric: true
+          });
         });
       } else if (panel.yAxisSort == 'z → a') {
         ticks.sort(function (b, a) {
-          return a.localeCompare(b, 'en', { ignorePunctuation: false, numeric: true });
+          return a.localeCompare(b, 'en', {
+            ignorePunctuation: false,
+            numeric: true
+          });
         });
       }
 
       var yAxisScale = getYAxisScale(ticks);
       scope.yScale = yScale = getYScale(ticks);
-
       var yAxis = d3.axisLeft(yAxisScale).tickValues(ticks).tickSizeInner(0 - width).tickPadding(Y_AXIS_TICK_PADDING);
+      heatmap.append("g").attr("class", "axis axis-y").call(yAxis); // Calculate Y axis width first, then move axis into visible area
 
-      heatmap.append("g").attr("class", "axis axis-y").call(yAxis);
-
-      // Calculate Y axis width first, then move axis into visible area
       var posY = margin.top;
       var posX = getYAxisWidth(heatmap) + Y_AXIS_TICK_PADDING;
-      heatmap.select(".axis-y").attr("transform", "translate(" + posX + "," + posY + ")");
+      heatmap.select(".axis-y").attr("transform", "translate(" + posX + "," + posY + ")"); // Remove vertical line in the right of axis labels (called domain in d3)
 
-      // Remove vertical line in the right of axis labels (called domain in d3)
       heatmap.select(".axis-y").select(".domain").remove();
       heatmap.select(".axis-y").selectAll(".tick line").remove();
-    }
+    } // Wide Y values range and adjust to bucket size
 
-    // Wide Y values range and adjust to bucket size
+
     function wideYAxisRange(min, max, tickInterval) {
       var y_widing = (max * (dataRangeWidingFactor - 1) - min * (dataRangeWidingFactor - 1)) / 2;
-      var y_min = void 0,
-          y_max = void 0;
+      var y_min, y_max;
 
       if (tickInterval === 0) {
         y_max = max * dataRangeWidingFactor;
@@ -193,30 +178,31 @@ System.register(['lodash', 'jquery', 'moment', 'app/core/utils/kbn', 'app/core/c
       } else {
         y_max = Math.ceil((max + y_widing) / tickInterval) * tickInterval;
         y_min = Math.floor((min - y_widing) / tickInterval) * tickInterval;
-      }
+      } // Don't wide axis below 0 if all values are positive
 
-      // Don't wide axis below 0 if all values are positive
+
       if (min >= 0 && y_min < 0) {
         y_min = 0;
       }
 
-      return { y_min: y_min, y_max: y_max };
+      return {
+        y_min: y_min,
+        y_max: y_max
+      };
     }
 
     function tickValueFormatter(decimals) {
       var scaledDecimals = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : null;
-
       var format = panel.yAxis.format;
       return function (value) {
         return kbn.valueFormats[format](value, decimals, scaledDecimals);
       };
-    }
-
-    // Create svg element, add axes and
+    } // Create svg element, add axes and
     // calculate sizes for cards drawing
+
+
     function addHeatmapCanvas() {
       var heatmap_elem = $heatmap[0];
-
       width = Math.floor($heatmap.width()) - padding.right;
       height = Math.floor($heatmap.height()) - padding.bottom;
 
@@ -225,30 +211,23 @@ System.register(['lodash', 'jquery', 'moment', 'app/core/utils/kbn', 'app/core/c
       }
 
       heatmap = d3.select(heatmap_elem).append("svg").attr("width", width).attr("height", height);
-
       chartHeight = height - margin.top - margin.bottom;
       chartTop = margin.top;
       chartBottom = chartTop + chartHeight;
-
       cardHSpacing = panel.cards.cardHSpacing !== null ? panel.cards.cardHSpacing : CARD_H_SPACING;
       cardVSpacing = panel.cards.cardVSpacing !== null ? panel.cards.cardVSpacing : CARD_V_SPACING;
-      cardRound = panel.cards.cardRound !== null ? panel.cards.cardRound : CARD_ROUND;
+      cardRound = panel.cards.cardRound !== null ? panel.cards.cardRound : CARD_ROUND; // calculate yOffset for YAxis
 
-      // calculate yOffset for YAxis
       yGridSize = Math.floor(chartHeight / cardsData.yBucketSize);
       cardHeight = yGridSize ? yGridSize - cardVSpacing : 0;
       yOffset = cardHeight / 2;
-
       addYAxis();
-
       yAxisWidth = getYAxisWidth(heatmap) + Y_AXIS_TICK_PADDING;
-      chartWidth = width - yAxisWidth - margin.right;
-
-      // TODO allow per-y cardWidth!
+      chartWidth = width - yAxisWidth - margin.right; // TODO allow per-y cardWidth!
       // we need to fill chartWidth with xBucketSize cards.
+
       xGridSize = chartWidth / (cardsData.xBucketSize + 1);
       cardWidth = xGridSize - cardHSpacing;
-
       addXAxis();
       xAxisHeight = getXAxisHeight(heatmap);
 
@@ -263,24 +242,21 @@ System.register(['lodash', 'jquery', 'moment', 'app/core/utils/kbn', 'app/core/c
 
     function addHeatmap() {
       addHeatmapCanvas();
-
       var maxValue = panel.color.max || cardsData.maxValue;
       var minValue = panel.color.min || cardsData.minValue;
 
       if (panel.color.mode !== 'discrete') {
         colorScale = getColorScale(maxValue, minValue);
       }
-      setOpacityScale(maxValue);
 
+      setOpacityScale(maxValue);
       var cards = heatmap.selectAll(".status-heatmap-card").data(cardsData.cards);
       cards.append("title");
       cards = cards.enter().append("rect").attr("cardId", function (c) {
         return c.id;
-      }).attr("x", getCardX).attr("width", getCardWidth).attr("y", getCardY).attr("height", getCardHeight).attr("rx", cardRound).attr("ry", cardRound).attr("class", "bordered status-heatmap-card").style("fill", getCardColor).style("stroke", getCardColor).style("stroke-width", 0)
-      //.style("stroke-width", getCardStrokeWidth)
+      }).attr("x", getCardX).attr("width", getCardWidth).attr("y", getCardY).attr("height", getCardHeight).attr("rx", cardRound).attr("ry", cardRound).attr("class", "bordered status-heatmap-card").style("fill", getCardColor).style("stroke", getCardColor).style("stroke-width", 0) //.style("stroke-width", getCardStrokeWidth)
       //.style("stroke-dasharray", "3,3")
       .style("opacity", getCardOpacity);
-
       var $cards = $heatmap.find(".status-heatmap-card");
       $cards.on("mouseenter", function (event) {
         tooltip.mouseOverBucket = true;
@@ -313,15 +289,15 @@ System.register(['lodash', 'jquery', 'moment', 'app/core/utils/kbn', 'app/core/c
     function getColorScale(maxValue) {
       var minValue = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 0;
 
-      var colorScheme = _.find(ctrl.colorSchemes, { value: panel.color.colorScheme });
+      var colorScheme = _.find(ctrl.colorSchemes, {
+        value: panel.color.colorScheme
+      });
+
       var colorInterpolator = d3ScaleChromatic[colorScheme.value];
       var colorScaleInverted = colorScheme.invert === 'always' || colorScheme.invert === 'dark' && !contextSrv.user.lightTheme;
-
       if (maxValue == minValue) maxValue = minValue + 1;
-
       var start = colorScaleInverted ? maxValue : minValue;
       var end = colorScaleInverted ? minValue : maxValue;
-
       return d3.scaleSequential(colorInterpolator).domain([start, end]);
     }
 
@@ -334,8 +310,8 @@ System.register(['lodash', 'jquery', 'moment', 'app/core/utils/kbn', 'app/core/c
     }
 
     function getCardX(d) {
-      var x = void 0;
-      // cx is the center of the card. Card should be placed to the left.
+      var x; // cx is the center of the card. Card should be placed to the left.
+
       var cx = xScale(d.x);
 
       if (cx - cardWidth / 2 < 0) {
@@ -345,11 +321,11 @@ System.register(['lodash', 'jquery', 'moment', 'app/core/utils/kbn', 'app/core/c
       }
 
       return x;
-    }
+    } // xScale returns card center. Adjust cardWidth in case of overlaping.
 
-    // xScale returns card center. Adjust cardWidth in case of overlaping.
+
     function getCardWidth(d) {
-      var w = void 0;
+      var w;
       var cx = xScale(d.x);
 
       if (cx < cardWidth / 2) {
@@ -362,9 +338,9 @@ System.register(['lodash', 'jquery', 'moment', 'app/core/utils/kbn', 'app/core/c
         w = cardWidth / 2 + (chartWidth - cx - cardHSpacing / 2);
       } else {
         w = cardWidth;
-      }
+      } // Card width should be MIN_CARD_SIZE at least
 
-      // Card width should be MIN_CARD_SIZE at least
+
       w = Math.max(w, MIN_CARD_SIZE);
 
       if (cardHSpacing == 0) {
@@ -381,20 +357,19 @@ System.register(['lodash', 'jquery', 'moment', 'app/core/utils/kbn', 'app/core/c
     function getCardHeight(d) {
       var ys = yScale(d.y);
       var y = ys + chartTop - cardHeight - cardVSpacing / 2;
-      var h = cardHeight;
+      var h = cardHeight; // Cut card height to prevent overlay
 
-      // Cut card height to prevent overlay
       if (y < chartTop) {
         h = ys - cardVSpacing / 2;
       } else if (ys > chartBottom) {
         h = chartBottom - y;
       } else if (y + cardHeight > chartBottom) {
         h = chartBottom - y;
-      }
+      } // Height can't be more than chart height
 
-      // Height can't be more than chart height
-      h = Math.min(h, chartHeight);
-      // Card height should be MIN_CARD_SIZE at least
+
+      h = Math.min(h, chartHeight); // Card height should be MIN_CARD_SIZE at least
+
       h = Math.max(h, MIN_CARD_SIZE);
 
       if (cardVSpacing == 0) {
@@ -418,6 +393,7 @@ System.register(['lodash', 'jquery', 'moment', 'app/core/utils/kbn', 'app/core/c
       if (panel.nullPointMode === 'as empty' && d.value == null) {
         return 0;
       }
+
       if (panel.color.mode === 'opacity') {
         return opacityScale(d.value);
       } else {
@@ -429,18 +405,17 @@ System.register(['lodash', 'jquery', 'moment', 'app/core/utils/kbn', 'app/core/c
       if (panel.color.mode === 'discrete') {
         return '1';
       }
-      return '0';
-    }
 
-    /////////////////////////////
+      return '0';
+    } /////////////////////////////
     // Selection and crosshair //
     /////////////////////////////
-
     // Shared crosshair and tooltip
+
+
     appEvents.on('graph-hover', function (event) {
       drawSharedCrosshair(event.pos);
     }, scope);
-
     appEvents.on('graph-hover-clear', function () {
       clearCrosshair();
     }, scope);
@@ -460,12 +435,11 @@ System.register(['lodash', 'jquery', 'moment', 'app/core/utils/kbn', 'app/core/c
       $(document).unbind("mouseup", mouseUpHandler);
       mouseUpHandler = null;
       selection.active = false;
-
       var selectionRange = Math.abs(selection.x2 - selection.x1);
+
       if (selection.x2 >= 0 && selectionRange > MIN_SELECTION_WIDTH) {
         var timeFrom = xScale.invert(Math.min(selection.x1, selection.x2) - yAxisWidth - xGridSize / 2);
         var timeTo = xScale.invert(Math.max(selection.x1, selection.x2) - yAxisWidth - xGridSize / 2);
-
         ctrl.timeSrv.setTime({
           from: moment.utc(timeFrom),
           to: moment.utc(timeTo)
@@ -477,8 +451,7 @@ System.register(['lodash', 'jquery', 'moment', 'app/core/utils/kbn', 'app/core/c
 
     function onMouseLeave() {
       appEvents.emit('graph-hover-clear');
-      clearCrosshair();
-      //annotationTooltip.destroy();
+      clearCrosshair(); //annotationTooltip.destroy();
     }
 
     function onMouseMove(event) {
@@ -491,13 +464,13 @@ System.register(['lodash', 'jquery', 'moment', 'app/core/utils/kbn', 'app/core/c
         clearCrosshair();
         tooltip.destroy();
         annotationTooltip.destroy();
-
         selection.x2 = limitSelection(event.offsetX);
         drawSelection(selection.x1, selection.x2);
       } else {
         emitGraphHoverEvet(event);
         drawCrosshair(event.offsetX);
         tooltip.show(event); //, data);
+
         annotationTooltip.show(event);
       }
     }
@@ -508,16 +481,19 @@ System.register(['lodash', 'jquery', 'moment', 'app/core/utils/kbn', 'app/core/c
       var pos = {
         pageX: event.pageX,
         pageY: event.pageY,
-        x: x, x1: x,
-        y: y, y1: y,
+        x: x,
+        x1: x,
+        y: y,
+        y1: y,
         panelRelY: null
-      };
+      }; // Set minimum offset to prevent showing legend from another panel
 
-      // Set minimum offset to prevent showing legend from another panel
-      pos.panelRelY = Math.max(event.offsetY / height, 0.001);
+      pos.panelRelY = Math.max(event.offsetY / height, 0.001); // broadcast to other graph panels that we are hovering
 
-      // broadcast to other graph panels that we are hovering
-      appEvents.emit('graph-hover', { pos: pos, panel: panel });
+      appEvents.emit('graph-hover', {
+        pos: pos,
+        panel: panel
+      });
     }
 
     function limitSelection(x2) {
@@ -550,16 +526,14 @@ System.register(['lodash', 'jquery', 'moment', 'app/core/utils/kbn', 'app/core/c
     function drawCrosshair(position) {
       if (heatmap) {
         heatmap.selectAll(".status-heatmap-crosshair").remove();
-
         var posX = position;
         posX = Math.max(posX, yAxisWidth);
         posX = Math.min(posX, chartWidth + yAxisWidth);
-
         heatmap.append("g").attr("class", "status-heatmap-crosshair").attr("transform", "translate(" + posX + ",0)").append("line").attr("x1", 1).attr("y1", chartTop).attr("x2", 1).attr("y2", chartBottom).attr("stroke-width", 1);
       }
-    }
+    } // map time to X
 
-    // map time to X
+
     function drawSharedCrosshair(pos) {
       if (heatmap && ctrl.dashboard.graphTooltip !== 0) {
         var posX = xScale(pos.x) + yAxisWidth;
@@ -581,9 +555,9 @@ System.register(['lodash', 'jquery', 'moment', 'app/core/utils/kbn', 'app/core/c
 
       if (!data || !cardsData || !setElementHeight()) {
         return;
-      }
+      } // Draw default axes and return if no data
 
-      // Draw default axes and return if no data
+
       if (_.isEmpty(cardsData.cards)) {
         addHeatmapCanvas();
         return;
@@ -595,9 +569,9 @@ System.register(['lodash', 'jquery', 'moment', 'app/core/utils/kbn', 'app/core/c
       scope.chartHeight = chartHeight;
       scope.chartWidth = chartWidth;
       scope.chartTop = chartTop;
-    }
+    } // Register selection listeners
 
-    // Register selection listeners
+
     $heatmap.on("mousedown", onMouseDown);
     $heatmap.on("mousemove", onMouseMove);
     $heatmap.on("mouseleave", onMouseLeave);
@@ -612,12 +586,15 @@ System.register(['lodash', 'jquery', 'moment', 'app/core/utils/kbn', 'app/core/c
       }
 
       var annoData = _.map(ctrl.annotations, function (d, i) {
-        return { "x": Math.floor(yAxisWidth + xScale(d.time)), "id": i, "anno": d.source };
+        return {
+          "x": Math.floor(yAxisWidth + xScale(d.time)),
+          "id": i,
+          "anno": d.source
+        };
       });
 
       var anno = heatmap.append("g").attr("class", "statusmap-annotations").attr("transform", "translate(0.5,0)").selectAll(".statusmap-annotations").data(annoData).enter().append("g");
-      anno.append("line")
-      //.attr("class", "statusmap-annotation-tick")
+      anno.append("line") //.attr("class", "statusmap-annotation-tick")
       .attr("x1", function (d) {
         return d.x;
       }).attr("y1", chartTop).attr("x2", function (d) {
@@ -629,14 +606,13 @@ System.register(['lodash', 'jquery', 'moment', 'app/core/utils/kbn', 'app/core/c
         return [[d.x, chartBottom + 1], [d.x - 5, chartBottom + 6], [d.x + 5, chartBottom + 6]].join(" ");
       }).style("stroke-width", 0).style("fill", function (d) {
         return d.anno.iconColor;
-      });
-      // Polygons didn't fire mouseevents
+      }); // Polygons didn't fire mouseevents
+
       anno.append("rect").attr("x", function (d) {
         return d.x - 5;
       }).attr("width", 10).attr("y", chartBottom + 1).attr("height", 5).attr("class", "statusmap-annotation-tick").attr("annoId", function (d) {
         return d.id;
       }).style("opacity", 0);
-
       var $ticks = $heatmap.find(".statusmap-annotation-tick");
       $ticks.on("mouseenter", function (event) {
         annotationTooltip.mouseOverAnnotationTick = true;
@@ -645,8 +621,6 @@ System.register(['lodash', 'jquery', 'moment', 'app/core/utils/kbn', 'app/core/c
       });
     }
   }
-
-  _export('default', link);
 
   function grafanaTimeFormat(ticks, min, max) {
     if (min && max && ticks) {
@@ -658,20 +632,27 @@ System.register(['lodash', 'jquery', 'moment', 'app/core/utils/kbn', 'app/core/c
       if (secPerTick <= 45) {
         return "%H:%M:%S";
       }
+
       if (secPerTick <= 7200 || range <= oneDay) {
         return "%H:%M";
       }
+
       if (secPerTick <= 80000) {
         return "%m/%d %H:%M";
       }
+
       if (secPerTick <= 2419200 || range <= oneYear) {
         return "%m/%d";
       }
+
       return "%Y-%m";
     }
 
     return "%H:%M";
   }
+
+  _export("default", link);
+
   return {
     setters: [function (_lodash) {
       _ = _lodash.default;
