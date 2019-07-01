@@ -1,9 +1,9 @@
 "use strict";
 
-System.register(["angular", "lodash", "jquery", "d3", "./libs/d3-scale-chromatic/index", "app/core/core", "app/core/utils/ticks"], function (_export, _context) {
+System.register(["lodash", "jquery", "d3", "./libs/d3-scale-chromatic/index", "app/core/core", "app/core/utils/ticks", "app/core/core_module"], function (_export, _context) {
   "use strict";
 
-  var angular, _, $, d3, d3ScaleChromatic, contextSrv, tickStep, mod, LEGEND_STEP_WIDTH;
+  var _, $, d3, d3ScaleChromatic, contextSrv, tickStep, coreModule, LEGEND_STEP_WIDTH;
 
   function drawColorLegend(elem, colorScheme, rangeFrom, rangeTo, maxValue, minValue) {
     var legendElem = $(elem).find('svg');
@@ -66,7 +66,8 @@ System.register(["angular", "lodash", "jquery", "d3", "./libs/d3-scale-chromatic
     var valuesNumber = thresholds.length; // graph width as a fallback
 
     var $heatmap = $(elem).parent().parent().parent().find('.status-heatmap-panel');
-    var graphWidth = $heatmap.find('svg').attr("width"); // calculate max width of tooltip and use it as width for each item
+    var graphWidthAttr = $heatmap.find('svg').attr("width");
+    var graphWidth = parseInt(graphWidthAttr); // calculate max width of tooltip and use it as width for each item
 
     var textWidth = [];
     legend.selectAll(".hidden-texts").data(tooltips).enter().append("text").attr("class", "axis tick hidden-texts").attr("font-family", "sans-serif").text(function (d) {
@@ -285,9 +286,7 @@ System.register(["angular", "lodash", "jquery", "d3", "./libs/d3-scale-chromatic
   }
 
   return {
-    setters: [function (_angular) {
-      angular = _angular.default;
-    }, function (_lodash) {
+    setters: [function (_lodash) {
       _ = _lodash.default;
     }, function (_jquery) {
       $ = _jquery.default;
@@ -299,15 +298,16 @@ System.register(["angular", "lodash", "jquery", "d3", "./libs/d3-scale-chromatic
       contextSrv = _appCoreCore.contextSrv;
     }, function (_appCoreUtilsTicks) {
       tickStep = _appCoreUtilsTicks.tickStep;
+    }, function (_appCoreCore_module) {
+      coreModule = _appCoreCore_module.default;
     }],
     execute: function () {
-      mod = angular.module('grafana.directives');
       LEGEND_STEP_WIDTH = 2;
       /**
        * Bigger color legend for opacity and spectrum modes editor.
        */
 
-      mod.directive('optionsColorLegend', function () {
+      coreModule.directive('optionsColorLegend', function () {
         return {
           restrict: 'E',
           template: '<div class="status-heatmap-color-legend"><svg width="16.8rem" height="24px"></svg></div>',
@@ -342,7 +342,7 @@ System.register(["angular", "lodash", "jquery", "d3", "./libs/d3-scale-chromatic
        * Graph legend with values.
        */
 
-      mod.directive('statusHeatmapLegend', function () {
+      coreModule.directive('statusHeatmapLegend', function () {
         return {
           restrict: 'E',
           template: '<div class="status-heatmap-color-legend"><svg width="100px" height="6px"></svg></div>',

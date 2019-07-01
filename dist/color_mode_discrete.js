@@ -1,9 +1,9 @@
 "use strict";
 
-System.register(["lodash"], function (_export, _context) {
+System.register([], function (_export, _context) {
   "use strict";
 
-  var _, ColorModeDiscrete;
+  var ColorModeDiscrete;
 
   function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
@@ -11,10 +11,10 @@ System.register(["lodash"], function (_export, _context) {
 
   function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); return Constructor; }
 
+  function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
+
   return {
-    setters: [function (_lodash) {
-      _ = _lodash.default;
-    }],
+    setters: [],
     execute: function () {
       // Helper methods to handle discrete color mode
       _export("ColorModeDiscrete", ColorModeDiscrete =
@@ -22,6 +22,12 @@ System.register(["lodash"], function (_export, _context) {
       function () {
         function ColorModeDiscrete(scope) {
           _classCallCheck(this, ColorModeDiscrete);
+
+          _defineProperty(this, "scope", void 0);
+
+          _defineProperty(this, "panelCtrl", void 0);
+
+          _defineProperty(this, "panel", void 0);
 
           this.scope = scope;
           this.panelCtrl = scope.ctrl;

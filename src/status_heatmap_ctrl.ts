@@ -17,8 +17,6 @@ const VALUE_INDEX = 0,
       TIME_INDEX = 1;
 
 const panelDefaults = {
-  // aggregate: aggregates.AVG,
-  // fragment: fragments.HOUR,
   color: {
     mode: 'spectrum',
     cardColor: '#b4ff00',
@@ -97,12 +95,77 @@ const colorSchemes = [
 let colorModes = ['opacity', 'spectrum', 'discrete'];
 let opacityScales = ['linear', 'sqrt'];
 
+interface DataWarning {
+  title: string;
+  tip: string;
+}
+
+interface DataWarnings {
+  noColorDefined: DataWarning;
+  multipleValues: DataWarning;
+}
+
+interface ColorThreshold {
+
+}
+
+
+// A holder of values
+export class Card {
+  // uniq
+  id: number = 0;
+  // Array of values in this bucket
+  values: any[] = [];
+  // card has multiple values
+  multipleValues: boolean = false;
+  // card has values that has no color
+  noColorDefined: boolean = false;
+  //
+  y: string = "";
+  //
+  x: number = 0;
+  //
+  minValue: number = 0;
+  maxValue: number = 0;
+  value: number = 0;
+
+}
+
+declare class CardsStorage {
+  cards: Card[];
+  xBucketSize: number;
+  yBucketSize: number;
+  maxValue: number;
+  minValue: number;
+  multipleValues: boolean;
+  noColorDefined: boolean;
+  targets: string[];
+  targetIndex: any;
+}
+
 export class StatusHeatmapCtrl extends MetricsPanelCtrl {
   static templateUrl = 'module.html';
 
+  opacityScales: any = [];
+  colorModes: any = [];
+  colorSchemes: any = [];
+  unitFormats: any;
+  data: any;
+  cardsData: any;
+  graph: any;
+  multipleValues: boolean;
+  noColorDefined: boolean;
+  discreteHelper: ColorModeDiscrete;
+  dataWarnings: DataWarnings;
+
+  annotations: object[] = [];
+  annotationsSrv: any;
+  annotationsPromise: any;
+
   /** @ngInject */
-  constructor($scope, $injector, $rootScope, timeSrv, annotationsSrv) {
+  constructor($scope, $injector, $rootScope, annotationsSrv) {
     super($scope, $injector);
+
     _.defaultsDeep(this.panel, panelDefaults);
 
     this.opacityScales = opacityScales;
@@ -133,29 +196,39 @@ export class StatusHeatmapCtrl extends MetricsPanelCtrl {
     this.annotations = [];
     this.annotationsSrv = annotationsSrv;
 
-    this.events.on('data-received', this.onDataReceived);
-    this.events.on('data-snapshot-load', this.onDataReceived);
-    this.events.on('data-error', this.onDataError);
-    this.events.on('init-edit-mode', this.onInitEditMode);
-    this.events.on('render', this.onRender);
-    this.events.on('refresh', this.postRefresh);
+    this.events.on('render', this.onRender.bind(this));
+    this.events.on('data-received', this.onDataReceived.bind(this));
+    this.events.on('data-error', this.onDataError.bind(this));
+    this.events.on('data-snapshot-load', this.onDataReceived.bind(this));
+    this.events.on('init-edit-mode', this.onInitEditMode.bind(this));
+    this.events.on('refresh', this.postRefresh.bind(this));
     // custom event from rendering.js
-    this.events.on('render-complete', this.onRenderComplete);
+    this.events.on('render-complete', this.onRenderComplete.bind(this));
   }
 
-  onRenderComplete = (data) => {
+  onRenderComplete(data):void {
     this.graph.chartWidth = data.chartWidth;
     this.renderingCompleted();
-  };
+  }
+
+  getChartWidth():number {
+    const wndWidth = $(window).width();
+    // gripPos.w is a width in grid's measurements. Grid size in Grafana is 24.
+    const panelWidthFactor = this.panel.gridPos.w / 24;
+    const panelWidth = Math.ceil(wndWidth * panelWidthFactor);
+    // approximate chartWidth because y axis ticks not rendered yet on first data receive.
+    const chartWidth = _.max([
+      panelWidth - 200,
+      panelWidth/2
+    ]);
+
+    return chartWidth!;
+  }
 
   // override calculateInterval for discrete color mode
-  calculateInterval = () => {
-    let panelWidth = Math.ceil($(window).width() * (this.panel.gridPos.w / 24));
-    // approximate chartWidth because y axis ticks not rendered yet on first data receive.
-    let chartWidth = _.max([
-        panelWidth - 200,
-        panelWidth/2
-      ]);
+  calculateInterval() {
+
+    let chartWidth = this.getChartWidth();
 
     let minCardWidth = this.panel.cards.cardMinWidth;
     let minSpacing = this.panel.cards.cardHSpacing;
@@ -191,9 +264,9 @@ export class StatusHeatmapCtrl extends MetricsPanelCtrl {
 
     this.intervalMs = intervalMs;
     this.interval = kbn.secondsToHms(intervalMs / 1000);
-  };
+  }
 
-  issueQueries = (datasource) => {
+  issueQueries(datasource) {
     this.annotationsPromise = this.annotationsSrv.getAnnotations({
       dashboard: this.dashboard,
       panel: this.panel,
@@ -208,18 +281,22 @@ export class StatusHeatmapCtrl extends MetricsPanelCtrl {
      */
     // 5.x before 5.4 doesn't have dataPromises
     if ("undefined" !== typeof(this.annotationsSrv.datasourcePromises)) {
+      console.log("annotationsSrv.datasourcePromises");
       return this.annotationsSrv.datasourcePromises.then(r => {
         return super.issueQueries(datasource);
       });
     } else {
+      console.log("NO annotationsSrv.datasourcePromises");
       return super.issueQueries(datasource);
     }
   }
 
 
-  onDataReceived = (dataList) => {
+  onDataReceived(dataList) {
     this.data      = dataList;
     this.cardsData = this.convertToCards(this.data);
+
+    console.log("OnDataReceived");
 
     this.annotationsPromise.then(
       result => {
@@ -228,27 +305,29 @@ export class StatusHeatmapCtrl extends MetricsPanelCtrl {
         if (result.annotations && result.annotations.length > 0) {
           this.annotations = result.annotations;
         } else {
-          this.annotations = null;
+          this.annotations = [];
         }
+        console.log("annotationsPromise result " + this.annotations.length + " annotations");
         this.render();
       },
       () => {
         this.loading = false;
-        this.annotations = null;
+        this.annotations = [];
+        console.log("annotationsPromise onrejected");
         this.render();
       }
     );
 
     //this.render();
-  };
+  }
 
-  onInitEditMode = () => {
+  onInitEditMode() {
     this.addEditorTab('Options', statusHeatmapOptionsEditor, 2);
     this.unitFormats = kbn.getUnitFormats();
-  };
+  }
 
-  onRender = () => {
-    if (!this.data) { return; }
+  onRender() {
+    if (!this.range || !this.data) { return; }
 
     this.multipleValues = false;
     if (!this.panel.useMax) {
@@ -264,47 +343,47 @@ export class StatusHeatmapCtrl extends MetricsPanelCtrl {
         this.noColorDefined = this.cardsData.noColorDefined;
       }
     }
-  };
+  }
 
-  onCardColorChange = (newColor) => {
+  onCardColorChange(newColor) {
     this.panel.color.cardColor = newColor;
     this.render();
-  };
+  }
 
-  onDataError = () => {
+  onDataError() {
     this.data = [];
     this.annotations = [];
     this.render();
-  };
+  }
 
-  postRefresh = () => {
+  postRefresh() {
     this.noColorDefined = false;
-  };
+  }
 
-  onEditorAddThreshold = () => {
+  onEditorAddThreshold() {
     this.panel.color.thresholds.push({ color: this.panel.defaultColor });
     this.render();
-  };
+  }
 
-  onEditorRemoveThreshold = (index) => {
+  onEditorRemoveThreshold(index:number) {
     this.panel.color.thresholds.splice(index, 1);
     this.render();
-  };
+  }
 
-  onEditorRemoveThresholds = () => {
+  onEditorRemoveThresholds() {
     this.panel.color.thresholds = [];
     this.render();
-  };
+  }
 
-  onEditorAddThreeLights = () => {
+  onEditorAddThreeLights() {
     this.panel.color.thresholds.push({color: "red", value: 2, tooltip: "error" });
     this.panel.color.thresholds.push({color: "yellow", value: 1, tooltip: "warning" });
     this.panel.color.thresholds.push({color: "green", value: 0, tooltip: "ok" });
     this.render();
-  };
+  }
   
   /* https://ethanschoonover.com/solarized/ */
-  onEditorAddSolarized = () => {
+  onEditorAddSolarized() {
     this.panel.color.thresholds.push({color: "#b58900", value: 0, tooltip: "yellow" });
     this.panel.color.thresholds.push({color: "#cb4b16", value: 1, tooltip: "orange" });
     this.panel.color.thresholds.push({color: "#dc322f", value: 2, tooltip: "red" });
@@ -316,13 +395,13 @@ export class StatusHeatmapCtrl extends MetricsPanelCtrl {
     this.render();
   }
 
-  link = (scope, elem, attrs, ctrl) => {
+  link(scope, elem, attrs, ctrl) {
     rendering(scope, elem, attrs, ctrl);
-  };
+  }
 
   // group values into buckets by target
-  convertToCards = (data) => {
-    let cardsData = {
+  convertToCards(data) {
+  let cardsData = <CardsStorage> {
       cards: [],
       xBucketSize: 0,
       yBucketSize: 0,
@@ -355,14 +434,11 @@ export class StatusHeatmapCtrl extends MetricsPanelCtrl {
       let target = cardsData.targets[i];
 
       for (let j = 0; j < cardsData.xBucketSize; j++) {
-        let card = {
-          id: i*cardsData.xBucketSize + j,
-          values: [],
-          multipleValues: false,
-          noColorDefined: false,
-          y: target,
-          x: -1,
-        };
+        let card = new Card();
+        card.id = i*cardsData.xBucketSize + j;
+        card.values = [];
+        card.y = target;
+        card.x = -1;
 
         // collect values from all timeseries with target
         for (let si = 0; si < cardsData.targetIndex[target].length; si++) {
@@ -399,5 +475,5 @@ export class StatusHeatmapCtrl extends MetricsPanelCtrl {
     }
 
     return cardsData;
-  };
+  }
 }

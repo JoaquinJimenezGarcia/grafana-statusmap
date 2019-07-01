@@ -1,15 +1,17 @@
 "use strict";
 
-System.register(["d3", "jquery", "lodash", "app/core/utils/kbn"], function (_export, _context) {
+System.register(["d3", "jquery", "lodash"], function (_export, _context) {
   "use strict";
 
-  var d3, $, _, kbn, TOOLTIP_PADDING_X, TOOLTIP_PADDING_Y, AnnotationTooltip;
+  var d3, $, _, TOOLTIP_PADDING_X, TOOLTIP_PADDING_Y, AnnotationTooltip;
 
   function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
   function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
 
   function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); return Constructor; }
+
+  function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
 
   return {
     setters: [function (_d) {
@@ -18,8 +20,6 @@ System.register(["d3", "jquery", "lodash", "app/core/utils/kbn"], function (_exp
       $ = _jquery.default;
     }, function (_lodash) {
       _ = _lodash.default;
-    }, function (_appCoreUtilsKbn) {
-      kbn = _appCoreUtilsKbn.default;
     }],
     execute: function () {
       TOOLTIP_PADDING_X = 30;
@@ -30,6 +30,20 @@ System.register(["d3", "jquery", "lodash", "app/core/utils/kbn"], function (_exp
       function () {
         function AnnotationTooltip(elem, scope) {
           _classCallCheck(this, AnnotationTooltip);
+
+          _defineProperty(this, "scope", void 0);
+
+          _defineProperty(this, "dashboard", void 0);
+
+          _defineProperty(this, "panelCtrl", void 0);
+
+          _defineProperty(this, "panel", void 0);
+
+          _defineProperty(this, "mouseOverAnnotationTick", void 0);
+
+          _defineProperty(this, "tooltipBase", void 0);
+
+          _defineProperty(this, "tooltip", void 0);
 
           this.scope = scope;
           this.dashboard = scope.ctrl.dashboard;

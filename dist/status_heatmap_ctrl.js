@@ -1,27 +1,31 @@
 "use strict";
 
-System.register(["app/plugins/sdk", "lodash", "app/core/core", "app/core/utils/kbn", "./color_legend", "./rendering", "./options_editor", "./color_mode_discrete"], function (_export, _context) {
+System.register(["app/plugins/sdk", "lodash", "app/core/utils/kbn", "./color_legend", "./rendering", "./options_editor", "./color_mode_discrete"], function (_export, _context) {
   "use strict";
 
-  var MetricsPanelCtrl, _, contextSrv, kbn, rendering, statusHeatmapOptionsEditor, ColorModeDiscrete, CANVAS, SVG, VALUE_INDEX, TIME_INDEX, panelDefaults, renderer, colorSchemes, colorModes, opacityScales, StatusHeatmapCtrl;
+  var MetricsPanelCtrl, _, kbn, rendering, statusHeatmapOptionsEditor, ColorModeDiscrete, CANVAS, SVG, VALUE_INDEX, TIME_INDEX, panelDefaults, renderer, colorSchemes, colorModes, opacityScales, Card, StatusHeatmapCtrl;
 
   function _typeof(obj) { if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof(obj); }
 
-  function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+  function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
+
+  function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); return Constructor; }
 
   function _possibleConstructorReturn(self, call) { if (call && (_typeof(call) === "object" || typeof call === "function")) { return call; } return _assertThisInitialized(self); }
 
   function _assertThisInitialized(self) { if (self === void 0) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return self; }
-
-  function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function"); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, writable: true, configurable: true } }); if (superClass) _setPrototypeOf(subClass, superClass); }
-
-  function _setPrototypeOf(o, p) { _setPrototypeOf = Object.setPrototypeOf || function _setPrototypeOf(o, p) { o.__proto__ = p; return o; }; return _setPrototypeOf(o, p); }
 
   function _get(target, property, receiver) { if (typeof Reflect !== "undefined" && Reflect.get) { _get = Reflect.get; } else { _get = function _get(target, property, receiver) { var base = _superPropBase(target, property); if (!base) return; var desc = Object.getOwnPropertyDescriptor(base, property); if (desc.get) { return desc.get.call(receiver); } return desc.value; }; } return _get(target, property, receiver || target); }
 
   function _superPropBase(object, property) { while (!Object.prototype.hasOwnProperty.call(object, property)) { object = _getPrototypeOf(object); if (object === null) break; } return object; }
 
   function _getPrototypeOf(o) { _getPrototypeOf = Object.setPrototypeOf ? Object.getPrototypeOf : function _getPrototypeOf(o) { return o.__proto__ || Object.getPrototypeOf(o); }; return _getPrototypeOf(o); }
+
+  function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function"); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, writable: true, configurable: true } }); if (superClass) _setPrototypeOf(subClass, superClass); }
+
+  function _setPrototypeOf(o, p) { _setPrototypeOf = Object.setPrototypeOf || function _setPrototypeOf(o, p) { o.__proto__ = p; return o; }; return _setPrototypeOf(o, p); }
+
+  function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
   function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
 
@@ -30,8 +34,6 @@ System.register(["app/plugins/sdk", "lodash", "app/core/core", "app/core/utils/k
       MetricsPanelCtrl = _appPluginsSdk.MetricsPanelCtrl;
     }, function (_lodash) {
       _ = _lodash.default;
-    }, function (_appCoreCore) {
-      contextSrv = _appCoreCore.contextSrv;
     }, function (_appCoreUtilsKbn) {
       kbn = _appCoreUtilsKbn.default;
     }, function (_color_legend) {}, function (_rendering) {
@@ -47,8 +49,6 @@ System.register(["app/plugins/sdk", "lodash", "app/core/core", "app/core/utils/k
       VALUE_INDEX = 0;
       TIME_INDEX = 1;
       panelDefaults = {
-        // aggregate: aggregates.AVG,
-        // fragment: fragments.HOUR,
         color: {
           mode: 'spectrum',
           cardColor: '#b4ff00',
@@ -185,48 +185,152 @@ System.register(["app/plugins/sdk", "lodash", "app/core/core", "app/core/utils/k
       colorModes = ['opacity', 'spectrum', 'discrete'];
       opacityScales = ['linear', 'sqrt'];
 
+      // A holder of values
+      _export("Card", Card = function Card() {
+        _classCallCheck(this, Card);
+
+        _defineProperty(this, "id", 0);
+
+        _defineProperty(this, "values", []);
+
+        _defineProperty(this, "multipleValues", false);
+
+        _defineProperty(this, "noColorDefined", false);
+
+        _defineProperty(this, "y", "");
+
+        _defineProperty(this, "x", 0);
+
+        _defineProperty(this, "minValue", 0);
+
+        _defineProperty(this, "maxValue", 0);
+
+        _defineProperty(this, "value", 0);
+      });
+
       _export("StatusHeatmapCtrl", StatusHeatmapCtrl =
       /*#__PURE__*/
       function (_MetricsPanelCtrl) {
         _inherits(StatusHeatmapCtrl, _MetricsPanelCtrl);
 
         /** @ngInject */
-        function StatusHeatmapCtrl($scope, $injector, $rootScope, timeSrv, annotationsSrv) {
+        function StatusHeatmapCtrl($scope, $injector, $rootScope, annotationsSrv) {
           var _this;
 
           _classCallCheck(this, StatusHeatmapCtrl);
 
           _this = _possibleConstructorReturn(this, _getPrototypeOf(StatusHeatmapCtrl).call(this, $scope, $injector));
 
-          _defineProperty(_assertThisInitialized(_this), "onRenderComplete", function (data) {
-            _this.graph.chartWidth = data.chartWidth;
+          _defineProperty(_assertThisInitialized(_this), "opacityScales", []);
 
-            _this.renderingCompleted();
-          });
+          _defineProperty(_assertThisInitialized(_this), "colorModes", []);
 
-          _defineProperty(_assertThisInitialized(_this), "calculateInterval", function () {
-            var panelWidth = Math.ceil($(window).width() * (_this.panel.gridPos.w / 24)); // approximate chartWidth because y axis ticks not rendered yet on first data receive.
+          _defineProperty(_assertThisInitialized(_this), "colorSchemes", []);
+
+          _defineProperty(_assertThisInitialized(_this), "unitFormats", void 0);
+
+          _defineProperty(_assertThisInitialized(_this), "data", void 0);
+
+          _defineProperty(_assertThisInitialized(_this), "cardsData", void 0);
+
+          _defineProperty(_assertThisInitialized(_this), "graph", void 0);
+
+          _defineProperty(_assertThisInitialized(_this), "multipleValues", void 0);
+
+          _defineProperty(_assertThisInitialized(_this), "noColorDefined", void 0);
+
+          _defineProperty(_assertThisInitialized(_this), "discreteHelper", void 0);
+
+          _defineProperty(_assertThisInitialized(_this), "dataWarnings", void 0);
+
+          _defineProperty(_assertThisInitialized(_this), "annotations", []);
+
+          _defineProperty(_assertThisInitialized(_this), "annotationsSrv", void 0);
+
+          _defineProperty(_assertThisInitialized(_this), "annotationsPromise", void 0);
+
+          _.defaultsDeep(_this.panel, panelDefaults);
+
+          _this.opacityScales = opacityScales;
+          _this.colorModes = colorModes;
+          _this.colorSchemes = colorSchemes; // default graph width for discrete card width calculation
+
+          _this.graph = {
+            "chartWidth": -1
+          };
+          _this.multipleValues = false;
+          _this.noColorDefined = false;
+          _this.discreteHelper = new ColorModeDiscrete($scope);
+          _this.dataWarnings = {
+            "noColorDefined": {
+              title: 'Data has value with undefined color',
+              tip: 'Check metric values, color values or define a new color'
+            },
+            "multipleValues": {
+              title: 'Data has multiple values for one target',
+              tip: 'Change targets definitions or set "use max value"'
+            }
+          };
+          _this.annotations = [];
+          _this.annotationsSrv = annotationsSrv;
+
+          _this.events.on('render', _this.onRender.bind(_assertThisInitialized(_this)));
+
+          _this.events.on('data-received', _this.onDataReceived.bind(_assertThisInitialized(_this)));
+
+          _this.events.on('data-error', _this.onDataError.bind(_assertThisInitialized(_this)));
+
+          _this.events.on('data-snapshot-load', _this.onDataReceived.bind(_assertThisInitialized(_this)));
+
+          _this.events.on('init-edit-mode', _this.onInitEditMode.bind(_assertThisInitialized(_this)));
+
+          _this.events.on('refresh', _this.postRefresh.bind(_assertThisInitialized(_this))); // custom event from rendering.js
+
+
+          _this.events.on('render-complete', _this.onRenderComplete.bind(_assertThisInitialized(_this)));
+
+          return _this;
+        }
+
+        _createClass(StatusHeatmapCtrl, [{
+          key: "onRenderComplete",
+          value: function onRenderComplete(data) {
+            this.graph.chartWidth = data.chartWidth;
+            this.renderingCompleted();
+          }
+        }, {
+          key: "getChartWidth",
+          value: function getChartWidth() {
+            var wndWidth = $(window).width(); // gripPos.w is a width in grid's measurements. Grid size in Grafana is 24.
+
+            var panelWidthFactor = this.panel.gridPos.w / 24;
+            var panelWidth = Math.ceil(wndWidth * panelWidthFactor); // approximate chartWidth because y axis ticks not rendered yet on first data receive.
 
             var chartWidth = _.max([panelWidth - 200, panelWidth / 2]);
 
-            var minCardWidth = _this.panel.cards.cardMinWidth;
-            var minSpacing = _this.panel.cards.cardHSpacing;
+            return chartWidth;
+          } // override calculateInterval for discrete color mode
+
+        }, {
+          key: "calculateInterval",
+          value: function calculateInterval() {
+            var chartWidth = this.getChartWidth();
+            var minCardWidth = this.panel.cards.cardMinWidth;
+            var minSpacing = this.panel.cards.cardHSpacing;
             var maxCardsCount = Math.ceil((chartWidth - minCardWidth) / (minCardWidth + minSpacing));
             var intervalMs;
+            var rangeMs = this.range.to.valueOf() - this.range.from.valueOf(); // this is minimal interval! kbn.round_interval will lower it.
 
-            var rangeMs = _this.range.to.valueOf() - _this.range.from.valueOf(); // this is minimal interval! kbn.round_interval will lower it.
-
-
-            intervalMs = _this.discreteHelper.roundIntervalCeil(rangeMs / maxCardsCount); // Calculate low limit of interval
+            intervalMs = this.discreteHelper.roundIntervalCeil(rangeMs / maxCardsCount); // Calculate low limit of interval
 
             var lowLimitMs = 1; // 1 millisecond default low limit
 
-            var intervalOverride = _this.panel.interval; // if no panel interval check datasource
+            var intervalOverride = this.panel.interval; // if no panel interval check datasource
 
             if (intervalOverride) {
-              intervalOverride = _this.templateSrv.replace(intervalOverride, _this.panel.scopedVars);
-            } else if (_this.datasource && _this.datasource.interval) {
-              intervalOverride = _this.datasource.interval;
+              intervalOverride = this.templateSrv.replace(intervalOverride, this.panel.scopedVars);
+            } else if (this.datasource && this.datasource.interval) {
+              intervalOverride = this.datasource.interval;
             }
 
             if (intervalOverride) {
@@ -241,15 +345,18 @@ System.register(["app/plugins/sdk", "lodash", "app/core/core", "app/core/utils/k
               intervalMs = lowLimitMs;
             }
 
-            _this.intervalMs = intervalMs;
-            _this.interval = kbn.secondsToHms(intervalMs / 1000);
-          });
+            this.intervalMs = intervalMs;
+            this.interval = kbn.secondsToHms(intervalMs / 1000);
+          }
+        }, {
+          key: "issueQueries",
+          value: function issueQueries(datasource) {
+            var _this2 = this;
 
-          _defineProperty(_assertThisInitialized(_this), "issueQueries", function (datasource) {
-            _this.annotationsPromise = _this.annotationsSrv.getAnnotations({
-              dashboard: _this.dashboard,
-              panel: _this.panel,
-              range: _this.range
+            this.annotationsPromise = this.annotationsSrv.getAnnotations({
+              dashboard: this.dashboard,
+              panel: this.panel,
+              range: this.range
             });
             /* Wait for annotationSrv requests to get datasources to
              * resolve before issuing queries. This allows the annotations
@@ -259,184 +366,189 @@ System.register(["app/plugins/sdk", "lodash", "app/core/core", "app/core/utils/k
              */
             // 5.x before 5.4 doesn't have dataPromises
 
-            if ("undefined" !== typeof _this.annotationsSrv.datasourcePromises) {
-              return _this.annotationsSrv.datasourcePromises.then(function (r) {
-                return _get(_getPrototypeOf(StatusHeatmapCtrl.prototype), "issueQueries", _assertThisInitialized(_this)).call(_assertThisInitialized(_this), datasource);
+            if ("undefined" !== typeof this.annotationsSrv.datasourcePromises) {
+              console.log("annotationsSrv.datasourcePromises");
+              return this.annotationsSrv.datasourcePromises.then(function (r) {
+                return _get(_getPrototypeOf(StatusHeatmapCtrl.prototype), "issueQueries", _this2).call(_this2, datasource);
               });
             } else {
-              return _get(_getPrototypeOf(StatusHeatmapCtrl.prototype), "issueQueries", _assertThisInitialized(_this)).call(_assertThisInitialized(_this), datasource);
+              console.log("NO annotationsSrv.datasourcePromises");
+              return _get(_getPrototypeOf(StatusHeatmapCtrl.prototype), "issueQueries", this).call(this, datasource);
             }
-          });
+          }
+        }, {
+          key: "onDataReceived",
+          value: function onDataReceived(dataList) {
+            var _this3 = this;
 
-          _defineProperty(_assertThisInitialized(_this), "onDataReceived", function (dataList) {
-            _this.data = dataList;
-            _this.cardsData = _this.convertToCards(_this.data);
-
-            _this.annotationsPromise.then(function (result) {
-              _this.loading = false; //this.alertState = result.alertState;
+            this.data = dataList;
+            this.cardsData = this.convertToCards(this.data);
+            console.log("OnDataReceived");
+            this.annotationsPromise.then(function (result) {
+              _this3.loading = false; //this.alertState = result.alertState;
 
               if (result.annotations && result.annotations.length > 0) {
-                _this.annotations = result.annotations;
+                _this3.annotations = result.annotations;
               } else {
-                _this.annotations = null;
+                _this3.annotations = [];
               }
 
-              _this.render();
+              console.log("annotationsPromise result " + _this3.annotations.length + " annotations");
+
+              _this3.render();
             }, function () {
-              _this.loading = false;
-              _this.annotations = null;
+              _this3.loading = false;
+              _this3.annotations = [];
+              console.log("annotationsPromise onrejected");
 
-              _this.render();
+              _this3.render();
             }); //this.render();
-
-          });
-
-          _defineProperty(_assertThisInitialized(_this), "onInitEditMode", function () {
-            _this.addEditorTab('Options', statusHeatmapOptionsEditor, 2);
-
-            _this.unitFormats = kbn.getUnitFormats();
-          });
-
-          _defineProperty(_assertThisInitialized(_this), "onRender", function () {
-            if (!_this.data) {
+          }
+        }, {
+          key: "onInitEditMode",
+          value: function onInitEditMode() {
+            this.addEditorTab('Options', statusHeatmapOptionsEditor, 2);
+            this.unitFormats = kbn.getUnitFormats();
+          }
+        }, {
+          key: "onRender",
+          value: function onRender() {
+            if (!this.range || !this.data) {
               return;
             }
 
-            _this.multipleValues = false;
+            this.multipleValues = false;
 
-            if (!_this.panel.useMax) {
-              if (_this.cardsData) {
-                _this.multipleValues = _this.cardsData.multipleValues;
+            if (!this.panel.useMax) {
+              if (this.cardsData) {
+                this.multipleValues = this.cardsData.multipleValues;
               }
             }
 
-            _this.noColorDefined = false;
+            this.noColorDefined = false;
 
-            if (_this.panel.color.mode === 'discrete') {
-              _this.discreteHelper.updateCardsValuesHasColorInfo();
+            if (this.panel.color.mode === 'discrete') {
+              this.discreteHelper.updateCardsValuesHasColorInfo();
 
-              if (_this.cardsData) {
-                _this.noColorDefined = _this.cardsData.noColorDefined;
+              if (this.cardsData) {
+                this.noColorDefined = this.cardsData.noColorDefined;
               }
             }
-          });
-
-          _defineProperty(_assertThisInitialized(_this), "onCardColorChange", function (newColor) {
-            _this.panel.color.cardColor = newColor;
-
-            _this.render();
-          });
-
-          _defineProperty(_assertThisInitialized(_this), "onDataError", function () {
-            _this.data = [];
-            _this.annotations = [];
-
-            _this.render();
-          });
-
-          _defineProperty(_assertThisInitialized(_this), "postRefresh", function () {
-            _this.noColorDefined = false;
-          });
-
-          _defineProperty(_assertThisInitialized(_this), "onEditorAddThreshold", function () {
-            _this.panel.color.thresholds.push({
-              color: _this.panel.defaultColor
+          }
+        }, {
+          key: "onCardColorChange",
+          value: function onCardColorChange(newColor) {
+            this.panel.color.cardColor = newColor;
+            this.render();
+          }
+        }, {
+          key: "onDataError",
+          value: function onDataError() {
+            this.data = [];
+            this.annotations = [];
+            this.render();
+          }
+        }, {
+          key: "postRefresh",
+          value: function postRefresh() {
+            this.noColorDefined = false;
+          }
+        }, {
+          key: "onEditorAddThreshold",
+          value: function onEditorAddThreshold() {
+            this.panel.color.thresholds.push({
+              color: this.panel.defaultColor
             });
-
-            _this.render();
-          });
-
-          _defineProperty(_assertThisInitialized(_this), "onEditorRemoveThreshold", function (index) {
-            _this.panel.color.thresholds.splice(index, 1);
-
-            _this.render();
-          });
-
-          _defineProperty(_assertThisInitialized(_this), "onEditorRemoveThresholds", function () {
-            _this.panel.color.thresholds = [];
-
-            _this.render();
-          });
-
-          _defineProperty(_assertThisInitialized(_this), "onEditorAddThreeLights", function () {
-            _this.panel.color.thresholds.push({
+            this.render();
+          }
+        }, {
+          key: "onEditorRemoveThreshold",
+          value: function onEditorRemoveThreshold(index) {
+            this.panel.color.thresholds.splice(index, 1);
+            this.render();
+          }
+        }, {
+          key: "onEditorRemoveThresholds",
+          value: function onEditorRemoveThresholds() {
+            this.panel.color.thresholds = [];
+            this.render();
+          }
+        }, {
+          key: "onEditorAddThreeLights",
+          value: function onEditorAddThreeLights() {
+            this.panel.color.thresholds.push({
               color: "red",
               value: 2,
               tooltip: "error"
             });
-
-            _this.panel.color.thresholds.push({
+            this.panel.color.thresholds.push({
               color: "yellow",
               value: 1,
               tooltip: "warning"
             });
-
-            _this.panel.color.thresholds.push({
+            this.panel.color.thresholds.push({
               color: "green",
               value: 0,
               tooltip: "ok"
             });
+            this.render();
+          }
+          /* https://ethanschoonover.com/solarized/ */
 
-            _this.render();
-          });
-
-          _defineProperty(_assertThisInitialized(_this), "onEditorAddSolarized", function () {
-            _this.panel.color.thresholds.push({
+        }, {
+          key: "onEditorAddSolarized",
+          value: function onEditorAddSolarized() {
+            this.panel.color.thresholds.push({
               color: "#b58900",
               value: 0,
               tooltip: "yellow"
             });
-
-            _this.panel.color.thresholds.push({
+            this.panel.color.thresholds.push({
               color: "#cb4b16",
               value: 1,
               tooltip: "orange"
             });
-
-            _this.panel.color.thresholds.push({
+            this.panel.color.thresholds.push({
               color: "#dc322f",
               value: 2,
               tooltip: "red"
             });
-
-            _this.panel.color.thresholds.push({
+            this.panel.color.thresholds.push({
               color: "#d33682",
               value: 3,
               tooltip: "magenta"
             });
-
-            _this.panel.color.thresholds.push({
+            this.panel.color.thresholds.push({
               color: "#6c71c4",
               value: 4,
               tooltip: "violet"
             });
-
-            _this.panel.color.thresholds.push({
+            this.panel.color.thresholds.push({
               color: "#268bd2",
               value: 5,
               tooltip: "blue"
             });
-
-            _this.panel.color.thresholds.push({
+            this.panel.color.thresholds.push({
               color: "#2aa198",
               value: 6,
               tooltip: "cyan"
             });
-
-            _this.panel.color.thresholds.push({
+            this.panel.color.thresholds.push({
               color: "#859900",
               value: 7,
               tooltip: "green"
             });
-
-            _this.render();
-          });
-
-          _defineProperty(_assertThisInitialized(_this), "link", function (scope, elem, attrs, ctrl) {
+            this.render();
+          }
+        }, {
+          key: "link",
+          value: function link(scope, elem, attrs, ctrl) {
             rendering(scope, elem, attrs, ctrl);
-          });
+          } // group values into buckets by target
 
-          _defineProperty(_assertThisInitialized(_this), "convertToCards", function (data) {
+        }, {
+          key: "convertToCards",
+          value: function convertToCards(data) {
             var cardsData = {
               cards: [],
               xBucketSize: 0,
@@ -474,14 +586,11 @@ System.register(["app/plugins/sdk", "lodash", "app/core/core", "app/core/utils/k
               var target = cardsData.targets[i];
 
               for (var j = 0; j < cardsData.xBucketSize; j++) {
-                var card = {
-                  id: i * cardsData.xBucketSize + j,
-                  values: [],
-                  multipleValues: false,
-                  noColorDefined: false,
-                  y: target,
-                  x: -1
-                }; // collect values from all timeseries with target
+                var card = new Card();
+                card.id = i * cardsData.xBucketSize + j;
+                card.values = [];
+                card.y = target;
+                card.x = -1; // collect values from all timeseries with target
 
                 for (var si = 0; si < cardsData.targetIndex[target].length; si++) {
                   var s = data[cardsData.targetIndex[target][si]];
@@ -520,50 +629,8 @@ System.register(["app/plugins/sdk", "lodash", "app/core/core", "app/core/utils/k
             }
 
             return cardsData;
-          });
-
-          _.defaultsDeep(_this.panel, panelDefaults);
-
-          _this.opacityScales = opacityScales;
-          _this.colorModes = colorModes;
-          _this.colorSchemes = colorSchemes; // default graph width for discrete card width calculation
-
-          _this.graph = {
-            "chartWidth": -1
-          };
-          _this.multipleValues = false;
-          _this.noColorDefined = false;
-          _this.discreteHelper = new ColorModeDiscrete($scope);
-          _this.dataWarnings = {
-            "noColorDefined": {
-              title: 'Data has value with undefined color',
-              tip: 'Check metric values, color values or define a new color'
-            },
-            "multipleValues": {
-              title: 'Data has multiple values for one target',
-              tip: 'Change targets definitions or set "use max value"'
-            }
-          };
-          _this.annotations = [];
-          _this.annotationsSrv = annotationsSrv;
-
-          _this.events.on('data-received', _this.onDataReceived);
-
-          _this.events.on('data-snapshot-load', _this.onDataReceived);
-
-          _this.events.on('data-error', _this.onDataError);
-
-          _this.events.on('init-edit-mode', _this.onInitEditMode);
-
-          _this.events.on('render', _this.onRender);
-
-          _this.events.on('refresh', _this.postRefresh); // custom event from rendering.js
-
-
-          _this.events.on('render-complete', _this.onRenderComplete);
-
-          return _this;
-        }
+          }
+        }]);
 
         return StatusHeatmapCtrl;
       }(MetricsPanelCtrl));
