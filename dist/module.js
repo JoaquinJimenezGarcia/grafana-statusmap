@@ -1,6 +1,6 @@
 "use strict";
 
-System.register(["lodash", "./color_legend", "app/core/utils/kbn", "app/plugins/sdk", "./statusmap_data", "./rendering", "./options_editor", "./color_mode_discrete", "./helper_format", "./helper_format_value"], function (_export, _context) {
+System.register(["lodash", "./color_legend", "app/core/utils/kbn", "app/plugins/sdk", "./statusmap_data", "./rendering", "./options_editor", "./color_mode_discrete", "./helper_format"], function (_export, _context) {
   "use strict";
 
   var _, kbn, loadPluginCss, MetricsPanelCtrl, Card, rendering, statusHeatmapOptionsEditor, ColorModeDiscrete, HelperFormat, HelperFormatValue, CANVAS, SVG, VALUE_INDEX, TIME_INDEX, renderer, colorSchemes, colorModes, opacityScales, StatusHeatmapCtrl;
@@ -47,8 +47,7 @@ System.register(["lodash", "./color_legend", "app/core/utils/kbn", "app/plugins/
       ColorModeDiscrete = _color_mode_discrete.ColorModeDiscrete;
     }, function (_helper_format) {
       HelperFormat = _helper_format.HelperFormat;
-    }, function (_helper_format_value) {
-      HelperFormatValue = _helper_format_value.HelperFormatValue;
+      HelperFormatValue = _helper_format.HelperFormatValue;
     }],
     execute: function () {
       CANVAS = 'CANVAS';

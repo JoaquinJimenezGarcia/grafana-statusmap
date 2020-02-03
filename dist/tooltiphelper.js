@@ -1,6 +1,6 @@
 "use strict";
 
-System.register(["d3", "lodash", "jquery", "./helper_format_value"], function (_export, _context) {
+System.register(["d3", "lodash", "jquery", "./helper_format"], function (_export, _context) {
   "use strict";
 
   var d3, _, $, HelperFormatValue, TOOLTIP_PADDING_X, TOOLTIP_PADDING_Y, StatusHeatmapTooltipHelper;
@@ -20,8 +20,8 @@ System.register(["d3", "lodash", "jquery", "./helper_format_value"], function (_
       _ = _lodash.default;
     }, function (_jquery) {
       $ = _jquery.default;
-    }, function (_helper_format_value) {
-      HelperFormatValue = _helper_format_value.HelperFormatValue;
+    }, function (_helper_format) {
+      HelperFormatValue = _helper_format.HelperFormatValue;
     }],
     execute: function () {
       TOOLTIP_PADDING_X = -50;

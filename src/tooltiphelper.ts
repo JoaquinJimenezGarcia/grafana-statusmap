@@ -2,7 +2,7 @@ import d3 from 'd3';
 import _ from 'lodash';
 import kbn from 'app/core/utils/kbn';
 import $ from 'jquery';
-import { HelperFormatValue } from './helper_format_value';
+import { HelperFormatValue } from './helper_format';
 
 const TOOLTIP_PADDING_X = -50;
 const TOOLTIP_PADDING_Y = 5;

@@ -3,9 +3,12 @@
 System.register([], function (_export, _context) {
   "use strict";
 
-  var HelperFormat;
+  var HelperFormat, HelperFormatValue;
 
-  _export("HelperFormat", void 0);
+  _export({
+    HelperFormat: void 0,
+    HelperFormatValue: void 0
+  });
 
   return {
     setters: [],
@@ -14,6 +17,11 @@ System.register([], function (_export, _context) {
         HelperFormat["Date"] = "Date";
         HelperFormat["Raw"] = "Raw";
       })(HelperFormat || _export("HelperFormat", HelperFormat = {}));
+
+      (function (HelperFormatValue) {
+        HelperFormatValue["Date"] = "YYYY/MM/DD/HH_mm_ss";
+        HelperFormatValue["Raw"] = "";
+      })(HelperFormatValue || _export("HelperFormatValue", HelperFormatValue = {}));
     }
   };
 });
