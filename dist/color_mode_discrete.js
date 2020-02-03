@@ -193,12 +193,14 @@ System.register([], function (_export, _context) {
               cards[i].noColorDefined = false;
               var values = cards[i].value;
               var threshold = this.getMatchedThreshold(values);
+              console.log('ESTE ES ANTES DE PONER A TRUEEEEE EN SINGULAAARRRR');
               console.log(threshold);
+              console.log(values);
+              console.log(cards);
 
               if (!threshold || !threshold.color || threshold.color == "") {
                 cards[i].noColorDefined = true;
                 this.panelCtrl.cardsData.noColorDefined = true;
-                break;
               }
             }
           }
@@ -218,6 +220,8 @@ System.register([], function (_export, _context) {
 
               for (var j = 0; j < values.length; j++) {
                 var threshold = this.getMatchedThreshold(values[j]);
+                console.log('ESTE ES ANTES DE PONER A TRUEEEEE EN PLURAAAAAAALLL');
+                console.log(threshold);
 
                 if (!threshold || !threshold.color || threshold.color == "") {
                   cards[i].noColorDefined = true;

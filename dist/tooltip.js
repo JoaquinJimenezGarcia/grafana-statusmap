@@ -174,8 +174,13 @@ System.register(["d3", "jquery", "lodash"], function (_export, _context) {
 
 
             if (this.panel.color.mode === 'discrete') {
+              console.log('ENTRA EN EL MODO DISCRETEEEEEE');
+              console.log(card);
+
               if (card.noColorDefined) {
+                console.log('ENTRA EN EL MODO DE ERROOOOOOOR');
                 var badValues = this.panelCtrl.discreteHelper.getNotColoredValues(values);
+                console.log(badValues);
                 tooltipHtml += "<div><b>Error:</b> ".concat(this.panelCtrl.dataWarnings.noColorDefined.title, "\n        <br>not colored values:\n        <ul>\n          ").concat(_.join(_.map(badValues, function (v) {
                   return "<li>".concat(v, "</li>");
                 }), ""), "\n        </ul>\n        </div>");

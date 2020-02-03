@@ -141,8 +141,12 @@ export class StatusmapTooltip {
 
     // Discrete mode errors
     if (this.panel.color.mode === 'discrete') {
+      console.log('ENTRA EN EL MODO DISCRETEEEEEE');
+      console.log(card);
       if (card.noColorDefined) {
+        console.log('ENTRA EN EL MODO DE ERROOOOOOOR');
         let badValues = this.panelCtrl.discreteHelper.getNotColoredValues(values);
+        console.log(badValues);
         tooltipHtml += `<div><b>Error:</b> ${this.panelCtrl.dataWarnings.noColorDefined.title}
         <br>not colored values:
         <ul>
