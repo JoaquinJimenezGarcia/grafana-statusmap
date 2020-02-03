@@ -472,7 +472,6 @@ System.register(["lodash", "./color_legend", "app/core/utils/kbn", "app/plugins/
 
             this.data = dataList;
             this.cardsData = this.convertToCards(this.data);
-            console.log("OnDataReceived");
             this.annotationsPromise.then(function (result) {
               _this3.loading = false; //this.alertState = result.alertState;
 
@@ -482,13 +481,10 @@ System.register(["lodash", "./color_legend", "app/core/utils/kbn", "app/plugins/
                 _this3.annotations = [];
               }
 
-              console.log("annotationsPromise result " + _this3.annotations.length + " annotations");
-
               _this3.render();
             }, function () {
               _this3.loading = false;
               _this3.annotations = [];
-              console.log("annotationsPromise onrejected");
 
               _this3.render();
             }); //this.render();
@@ -520,7 +516,6 @@ System.register(["lodash", "./color_legend", "app/core/utils/kbn", "app/plugins/
               if (this.panel.seriesFilterIndex == -1) {
                 this.discreteHelper.updateCardsValuesHasColorInfo();
               } else {
-                console.log(this.cardsData);
                 this.discreteHelper.updateCardsValuesHasColorInfoSingle();
               }
 
@@ -718,7 +713,6 @@ System.register(["lodash", "./color_legend", "app/core/utils/kbn", "app/plugins/
                 if (card.values.length > 1) {
                   cardsData.multipleValues = true;
                   card.multipleValues = true;
-                  console.log('PEPITOOOOOOOOOO');
                   card.value = this.panel.seriesFilterIndex != -1 ? card.values[this.panel.seriesFilterIndex] : card.maxValue;
                 } else {
                   card.value = card.maxValue; // max value by default

@@ -859,7 +859,7 @@ System.register(["lodash", "jquery", "moment", "app/core/utils/kbn", "app/core/c
                 "id": i,
                 "anno": d.source
               };
-            }); //console.log({"ctrl_annotations": this.ctrl.annotations, "annoData": annoData});
+            }); //({"ctrl_annotations": this.ctrl.annotations, "annoData": annoData});
 
 
             var anno = this.heatmap.append("g").attr("class", "statusmap-annotations").attr("transform", "translate(0.5,0)").selectAll(".statusmap-annotations").data(annoData).enter().append("g");

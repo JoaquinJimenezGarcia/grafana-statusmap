@@ -92,9 +92,6 @@ export class StatusmapTooltip {
     let statuses;
 
     if (this.panel.color.mode === 'discrete') {
-      console.log('HOSTIAS VALUES MENCANTEN');
-      console.log(values);
-      console.log(value);
       if (this.panel.seriesFilterIndex > 0) {
         statuses = this.panelCtrl.discreteHelper.convertValueToTooltips(value);
       } else {
@@ -107,8 +104,6 @@ export class StatusmapTooltip {
       } else if (statuses.length > 1) {
         statusesHtml = "statuses:";
       }
-      console.log('ESTUTESE: ');
-      console.log(statuses);
       tooltipHtml += `
       <div>
         name: <b>${y}</b> <br>
@@ -141,12 +136,8 @@ export class StatusmapTooltip {
 
     // Discrete mode errors
     if (this.panel.color.mode === 'discrete') {
-      console.log('ENTRA EN EL MODO DISCRETEEEEEE');
-      console.log(card);
       if (card.noColorDefined) {
-        console.log('ENTRA EN EL MODO DE ERROOOOOOOR');
         let badValues = this.panelCtrl.discreteHelper.getNotColoredValues(values);
-        console.log(badValues);
         tooltipHtml += `<div><b>Error:</b> ${this.panelCtrl.dataWarnings.noColorDefined.title}
         <br>not colored values:
         <ul>

@@ -46,14 +46,9 @@ export class ColorModeDiscrete {
     let thresholds = this.panel.color.thresholds;
     let tooltips = [];
 
-    console.log(thresholds);
-
     for (let i = 0; i < thresholds.length; i++) {
       //for (let j = 0; j < values.length; j++) {
         if (values == thresholds[i].value) {
-          console.log('ENTRAAAAA')
-          console.log(values);
-          console.log(thresholds[i].value);
           tooltips.push({
             "tooltip": thresholds[i].tooltip?thresholds[i].tooltip:values,
             "color": thresholds[i].color
@@ -102,8 +97,6 @@ export class ColorModeDiscrete {
     }
       let threshold = this.getMatchedThreshold(value);
 
-      console.log("THHHHRESHOLDDD", threshold);
-
       if (!threshold || !threshold.color || threshold.color == "") {
         return 'rgba(0,0,0,1)';
       } else {
@@ -141,9 +134,7 @@ export class ColorModeDiscrete {
 
     for (let i = 0; i < thresholds.length; i++) {
       for (let j = 0; j < values.length; j++) {
-        console.log("MULTICOLOR:", j, values[j], thresholds[i].value);
         if (values[j] == thresholds[i].value) {
-          console.log("ESTOY AQUI?");
           return this.getDiscreteColor(i);
         }
       }
@@ -162,10 +153,6 @@ export class ColorModeDiscrete {
       cards[i].noColorDefined = false;
       var values = cards[i].value;
       var threshold = this.getMatchedThreshold(values);
-      console.log('ESTE ES ANTES DE PONER A TRUEEEEE EN SINGULAAARRRR');
-      console.log(threshold);
-      console.log(values)
-      console.log(cards);
       if (!threshold || !threshold.color || threshold.color == "") {
         cards[i].noColorDefined = true;
         this.panelCtrl.cardsData.noColorDefined = true;
@@ -184,8 +171,6 @@ export class ColorModeDiscrete {
       let values = cards[i].values;
       for (let j=0; j<values.length; j++) {
         let threshold = this.getMatchedThreshold(values[j]);
-        console.log('ESTE ES ANTES DE PONER A TRUEEEEE EN PLURAAAAAAALLL');
-        console.log(threshold);
         if (!threshold || !threshold.color || threshold.color == "") {
           cards[i].noColorDefined = true;
           this.panelCtrl.cardsData.noColorDefined = true;
@@ -212,7 +197,6 @@ export class ColorModeDiscrete {
 
     let thresholds = this.panel.color.thresholds;
     for (let k = 0; k < thresholds.length; k++) {
-      console.log("VALUE: ",value, thresholds[k].value);
       if (value == thresholds[k].value) {
         return thresholds[k];
       }

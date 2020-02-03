@@ -134,10 +134,6 @@ System.register(["d3", "jquery", "lodash"], function (_export, _context) {
             var statuses;
 
             if (this.panel.color.mode === 'discrete') {
-              console.log('HOSTIAS VALUES MENCANTEN');
-              console.log(values);
-              console.log(value);
-
               if (this.panel.seriesFilterIndex > 0) {
                 statuses = this.panelCtrl.discreteHelper.convertValueToTooltips(value);
               } else {
@@ -152,8 +148,6 @@ System.register(["d3", "jquery", "lodash"], function (_export, _context) {
                 statusesHtml = "statuses:";
               }
 
-              console.log('ESTUTESE: ');
-              console.log(statuses);
               tooltipHtml += "\n      <div>\n        name: <b>".concat(y, "</b> <br>\n        ").concat(statusesHtml, "\n        <ul>\n          ").concat(_.join(_.map(statuses, function (v) {
                 return "<li style=\"background-color: ".concat(v.color, "\" class=\"discrete-item\">").concat(v.tooltip, "</li>");
               }), ""), "\n        </ul>\n      </div>");
@@ -174,13 +168,8 @@ System.register(["d3", "jquery", "lodash"], function (_export, _context) {
 
 
             if (this.panel.color.mode === 'discrete') {
-              console.log('ENTRA EN EL MODO DISCRETEEEEEE');
-              console.log(card);
-
               if (card.noColorDefined) {
-                console.log('ENTRA EN EL MODO DE ERROOOOOOOR');
                 var badValues = this.panelCtrl.discreteHelper.getNotColoredValues(values);
-                console.log(badValues);
                 tooltipHtml += "<div><b>Error:</b> ".concat(this.panelCtrl.dataWarnings.noColorDefined.title, "\n        <br>not colored values:\n        <ul>\n          ").concat(_.join(_.map(badValues, function (v) {
                   return "<li>".concat(v, "</li>");
                 }), ""), "\n        </ul>\n        </div>");

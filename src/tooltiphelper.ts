@@ -1,6 +1,5 @@
 import d3 from 'd3';
 import _ from 'lodash';
-import kbn from 'app/core/utils/kbn';
 import $ from 'jquery';
 import { HelperFormatValue } from './helper_format';
 

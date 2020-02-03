@@ -59,14 +59,10 @@ System.register([], function (_export, _context) {
           value: function convertValueToTooltips(values) {
             var thresholds = this.panel.color.thresholds;
             var tooltips = [];
-            console.log(thresholds);
 
             for (var i = 0; i < thresholds.length; i++) {
               //for (let j = 0; j < values.length; j++) {
               if (values == thresholds[i].value) {
-                console.log('ENTRAAAAA');
-                console.log(values);
-                console.log(thresholds[i].value);
                 tooltips.push({
                   "tooltip": thresholds[i].tooltip ? thresholds[i].tooltip : values,
                   "color": thresholds[i].color
@@ -125,7 +121,6 @@ System.register([], function (_export, _context) {
             }
 
             var threshold = this.getMatchedThreshold(value);
-            console.log("THHHHRESHOLDDD", threshold);
 
             if (!threshold || !threshold.color || threshold.color == "") {
               return 'rgba(0,0,0,1)';
@@ -168,10 +163,7 @@ System.register([], function (_export, _context) {
 
             for (var i = 0; i < thresholds.length; i++) {
               for (var _j = 0; _j < values.length; _j++) {
-                console.log("MULTICOLOR:", _j, values[_j], thresholds[i].value);
-
                 if (values[_j] == thresholds[i].value) {
-                  console.log("ESTOY AQUI?");
                   return this.getDiscreteColor(i);
                 }
               }
@@ -193,10 +185,6 @@ System.register([], function (_export, _context) {
               cards[i].noColorDefined = false;
               var values = cards[i].value;
               var threshold = this.getMatchedThreshold(values);
-              console.log('ESTE ES ANTES DE PONER A TRUEEEEE EN SINGULAAARRRR');
-              console.log(threshold);
-              console.log(values);
-              console.log(cards);
 
               if (!threshold || !threshold.color || threshold.color == "") {
                 cards[i].noColorDefined = true;
@@ -220,8 +208,6 @@ System.register([], function (_export, _context) {
 
               for (var j = 0; j < values.length; j++) {
                 var threshold = this.getMatchedThreshold(values[j]);
-                console.log('ESTE ES ANTES DE PONER A TRUEEEEE EN PLURAAAAAAALLL');
-                console.log(threshold);
 
                 if (!threshold || !threshold.color || threshold.color == "") {
                   cards[i].noColorDefined = true;
@@ -251,8 +237,6 @@ System.register([], function (_export, _context) {
             var thresholds = this.panel.color.thresholds;
 
             for (var k = 0; k < thresholds.length; k++) {
-              console.log("VALUE: ", value, thresholds[k].value);
-
               if (value == thresholds[k].value) {
                 return thresholds[k];
               }

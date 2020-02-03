@@ -761,7 +761,7 @@ export class StatusmapRenderer {
 
     let annoData = _.map(this.ctrl.annotations, (d,i) => ({"x": Math.floor(this.yAxisWidth + this.xScale(d.time)), "id":i, "anno": d.source}));
 
-    //console.log({"ctrl_annotations": this.ctrl.annotations, "annoData": annoData});
+    //({"ctrl_annotations": this.ctrl.annotations, "annoData": annoData});
 
     let anno = this.heatmap
         .append("g")
