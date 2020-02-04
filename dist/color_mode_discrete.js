@@ -16,7 +16,7 @@ System.register([], function (_export, _context) {
   return {
     setters: [],
     execute: function () {
-      // Helper methods to handle discrete color mode
+      // Extra Series methods to handle discrete color mode
       _export("ColorModeDiscrete", ColorModeDiscrete =
       /*#__PURE__*/
       function () {

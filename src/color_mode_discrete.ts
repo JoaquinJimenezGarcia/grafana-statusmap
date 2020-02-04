@@ -12,7 +12,7 @@ declare class DiscreteColorThreshold {
   tooltip: string;
 }
 
-// Helper methods to handle discrete color mode
+// Extra Series methods to handle discrete color mode
 export class ColorModeDiscrete {
   scope: any;
   panelCtrl: StatusHeatmapCtrl;

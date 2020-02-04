@@ -7,7 +7,7 @@ import {tickStep, getScaledDecimals, getFlotTickSize} from 'app/core/utils/ticks
 import * as d3 from 'd3';
 import * as d3ScaleChromatic from './libs/d3-scale-chromatic/index';
 import {StatusmapTooltip} from './tooltip';
-import {StatusHeatmapTooltipHelper} from './tooltiphelper';
+import {StatusHeatmapTooltipExtraSeries} from './tooltipextraseries';
 import {AnnotationTooltip} from './annotations';
 
 let MIN_CARD_SIZE = 5,
@@ -51,7 +51,7 @@ export class StatusmapRenderer {
   panel: any;
   $heatmap: any;
   tooltip: StatusmapTooltip;
-  tooltipHelper:StatusHeatmapTooltipHelper;
+  tooltipExtraSeries:StatusHeatmapTooltipExtraSeries;
   annotationTooltip: AnnotationTooltip;
   heatmap: any;
   timeRange: any;
@@ -66,7 +66,7 @@ export class StatusmapRenderer {
     // $heatmap is JQuery object, but heatmap is D3
     this.$heatmap = this.elem.find('.status-heatmap-panel');
     this.tooltip = new StatusmapTooltip(this.$heatmap, this.scope);
-    this.tooltipHelper = new StatusHeatmapTooltipHelper(this.$heatmap, this.scope);
+    this.tooltipExtraSeries = new StatusHeatmapTooltipExtraSeries(this.$heatmap, this.scope);
     this.annotationTooltip = new AnnotationTooltip(this.$heatmap, this.scope);
 
     this.yOffset = 0;
@@ -512,9 +512,9 @@ export class StatusmapRenderer {
       return this.colorScale(d.value);
     } else if (this.panel.color.mode === 'discrete') {
       if (this.panel.seriesFilterIndex != -1 || this.panel.seriesFilterIndex != null) {
-        return this.ctrl.discreteHelper.getBucketColorSingle(d.values[this.panel.seriesFilterIndex]);
+        return this.ctrl.discreteExtraSeries.getBucketColorSingle(d.values[this.panel.seriesFilterIndex]);
       } else {
-        return this.ctrl.discreteHelper.getBucketColor(d.values);
+        return this.ctrl.discreteExtraSeries.getBucketColor(d.values);
       }
     }
   }
@@ -585,9 +585,9 @@ export class StatusmapRenderer {
     this.clearCrosshair();
     //annotationTooltip.destroy();
     if (e.relatedTarget) {
-      if (e.relatedTarget.className == "statusmap-tooltiphelper graph-tooltip grafana-tooltip" || e.relatedTarget.className == "graph-tooltip-time" ) {
+      if (e.relatedTarget.className == "statusmap-tooltip-extraseries graph-tooltip grafana-tooltip" || e.relatedTarget.className == "graph-tooltip-time" ) {
       } else {
-        this.tooltipHelper.destroy();
+        this.tooltipExtraSeries.destroy();
       }
     }
     this.annotationTooltip.destroy(); 
@@ -615,7 +615,7 @@ export class StatusmapRenderer {
   }
 
   public onMouseClick(event) {
-    this.tooltipHelper.show(event)
+    this.tooltipExtraSeries.show(event)
     if (this.ctrl.panel.usingUrl) {
       this.tooltip.destroy();
     }
